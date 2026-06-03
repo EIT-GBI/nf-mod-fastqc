@@ -1,5 +1,6 @@
 # nf-mod-fastqc
 
+This is GBI's FastQC Nextflow module.
 
 Nextflow module for fastqc. Used as a git submodule by pipelines.
 

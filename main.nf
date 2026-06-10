@@ -15,6 +15,7 @@ process FASTQC {
     script:
     def args = task.ext.args ?: ''
     """
+    # Breaking change
     fastqc \\
         ${args} \\
         --threads ${task.cpus} \\

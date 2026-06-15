@@ -20,4 +20,10 @@ process FASTQC {
         --threads ${task.cpus} \\
         ${reads}
     """
+
+    stub:
+    """
+    touch ${sample}_R1_fastqc.zip ${sample}_R1_fastqc.html
+    touch ${sample}_R2_fastqc.zip ${sample}_R2_fastqc.html
+    """
 }

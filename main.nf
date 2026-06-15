@@ -5,7 +5,7 @@ process FASTQC {
     // Making big changes
 
     input:
-    tuple val(meta), path(reads)
+    tuple val(meta), path(r1), path(r2)
 
     output:
     tuple val(meta), path("*.html"), emit: html
@@ -18,12 +18,12 @@ process FASTQC {
     fastqc \\
         ${args} \\
         --threads ${task.cpus} \\
-        ${reads}
+        ${r1} ${r2}
     """
 
     stub:
     """
-    touch ${sample}_R1_fastqc.zip ${sample}_R1_fastqc.html
-    touch ${sample}_R2_fastqc.zip ${sample}_R2_fastqc.html
+    touch ${meta.id}_R1_fastqc.zip ${meta.id}_R1_fastqc.html
+    touch ${meta.id}_R2_fastqc.zip ${meta.id}_R2_fastqc.html
     """
 }

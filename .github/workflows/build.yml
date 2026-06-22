@@ -1,9 +1,9 @@
 name: build
 
+# Releases are built by release.yml (it builds when the Dockerfile changes
+# and re-tags otherwise). This workflow is a manual escape hatch for
+# rebuilding :latest on demand, so it intentionally has no automatic trigger.
 on:
-  push:
-    branches: [main]
-    paths: ['Dockerfile', '.github/workflows/build.yml']
   workflow_dispatch:
 
 permissions:

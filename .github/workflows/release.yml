@@ -62,6 +62,30 @@ jobs:
           esac
           echo "version=$MAJOR.$MINOR.$PATCH" >> $GITHUB_OUTPUT
 
+      - name: Resolve lowercase image name
+        id: img
+        # ghcr.io requires a lowercase path; github.repository can contain
+        # uppercase (e.g. EIT-GBI/...), which breaks plain docker commands.
+        run: echo "image=ghcr.io/${GITHUB_REPOSITORY,,}" >> "$GITHUB_OUTPUT"
+
+      - name: Decide whether the Dockerfile changed since the last release
+        id: docker_changed
+        # Build only when the image actually needs rebuilding. Compare the
+        # Dockerfile against the previous version tag; if it's identical we
+        # re-tag the existing image instead of rebuilding it.
+        run: |
+          LAST_TAG=$(git describe --tags --abbrev=0 --match 'v*' 2>/dev/null || echo "")
+          if [ -z "$LAST_TAG" ]; then
+            echo "No previous release tag found — will build."
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          elif ! git diff --quiet "$LAST_TAG" HEAD -- Dockerfile; then
+            echo "Dockerfile changed since $LAST_TAG — will build."
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "Dockerfile unchanged since $LAST_TAG — will re-tag existing image."
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - uses: docker/setup-qemu-action@v3
       - uses: docker/setup-buildx-action@v3
       - uses: docker/login-action@v3
@@ -70,29 +94,17 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Check if container exists in registry
-        id: container
-        run: |
-          IMAGE="ghcr.io/${{ github.repository }}:latest"
-          if docker manifest inspect "$IMAGE" >/dev/null 2>&1; then
-            echo "No container build needed — $IMAGE already exists."
-            echo "build=false" >> "$GITHUB_OUTPUT"
-          else
-            echo "No container found at $IMAGE — will build."
-            echo "build=true" >> "$GITHUB_OUTPUT"
-          fi
-
       - id: meta
-        if: steps.container.outputs.build == 'true'
+        if: steps.docker_changed.outputs.changed == 'true'
         uses: docker/metadata-action@v5
         with:
-          images: ghcr.io/${{ github.repository }}
+          images: ${{ steps.img.outputs.image }}
           tags: |
             type=raw,value=latest
             type=raw,value=v${{ steps.next.outputs.version }}
 
       - name: Build and push container
-        if: steps.container.outputs.build == 'true'
+        if: steps.docker_changed.outputs.changed == 'true'
         uses: docker/build-push-action@v6
         with:
           context: .
@@ -100,6 +112,16 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+
+      - name: Re-tag existing image (Dockerfile unchanged)
+        if: steps.docker_changed.outputs.changed == 'false'
+        # No rebuild needed: point the new version tag at the existing
+        # :latest manifest. imagetools copies the multi-arch index without
+        # pulling per-platform images.
+        run: |
+          docker buildx imagetools create \
+            --tag ${{ steps.img.outputs.image }}:v${{ steps.next.outputs.version }} \
+            ${{ steps.img.outputs.image }}:latest
 
       - name: Update nextflow.config
         run: |

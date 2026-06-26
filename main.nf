@@ -2,7 +2,7 @@ process FASTQC {
     tag "${meta.id}"
     label 'process_low'
 
-    // Making big changes
+    // Making really big changes
 
     input:
     tuple val(meta), path(reads)

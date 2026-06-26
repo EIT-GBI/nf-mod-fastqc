@@ -2,10 +2,12 @@ process FASTQC_FASTQC {
     tag "${meta.id}"
     label 'process_low'
 
+    publishDir "${params.outdir}/qc/fastqc", mode: 'link'
+
     // Making really big changes
 
     input:
-    tuple val(meta), path(reads)
+    tuple val(meta), path(r1), path(r2)
 
     output:
     tuple val(meta), path("*.html"), emit: html
@@ -19,7 +21,7 @@ process FASTQC_FASTQC {
     fastqc \\
         ${args} \\
         --threads ${task.cpus} \\
-        ${reads}
+        ${r1} ${r2}
     """
     
     stub:

@@ -1,4 +1,4 @@
-process FASTQC {
+process FASTQC_FASTQC {
     tag "${meta.id}"
     label 'process_low'
 
@@ -20,5 +20,11 @@ process FASTQC {
         ${args} \\
         --threads ${task.cpus} \\
         ${reads}
+    """
+    
+    stub:
+    """
+    touch ${meta.id}_R1_fastqc.zip ${meta.id}_R1_fastqc.html
+    touch ${meta.id}_R2_fastqc.zip ${meta.id}_R2_fastqc.html
     """
 }

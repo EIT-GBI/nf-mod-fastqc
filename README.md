@@ -8,7 +8,7 @@ Image: `ghcr.io/eit-gbi/nf-mod-fastqc:latest`
 
 ## Processes
 
-- `FASTQC` — TODO: describe inputs/outputs
+- `FASTQC_FASTQC` — TODO: describe inputs/outputs
 
 ## Use as submodule
 ```bash
@@ -17,5 +17,5 @@ git submodule add https://github.com/eit-gbi/nf-mod-fastqc.git modules/fastqc
 
 Then in your pipeline:
 ```
-include { FASTQC } from './modules/fastqc/main.nf'
+include { FASTQC_FASTQC } from './modules/fastqc/main.nf'
 ```

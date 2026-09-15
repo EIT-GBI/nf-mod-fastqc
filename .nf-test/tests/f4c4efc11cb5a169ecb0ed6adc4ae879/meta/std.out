@@ -1,5 +1,0 @@
-[PIPELINE] nf-mod-fastqc 2.0.2 | profile=standard
-[WORKDIR] /Users/pauline.fourgoux/Documents/Code/nf-dnaseq/modules/fastqc/.nf-test/tests/f4c4efc11cb5a169ecb0ed6adc4ae879/work
-[PROCESS 39/3166cd] FASTQC_FASTQC (test)
-
-[SUCCESS] completed=1 failed=0 cached=0

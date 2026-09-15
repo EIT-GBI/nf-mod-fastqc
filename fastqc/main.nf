@@ -2,10 +2,6 @@ process FASTQC_FASTQC {
     tag "${meta.id}"
     label 'process_low'
 
-    publishDir "${params.outdir}/qc/fastqc", mode: 'link'
-
-    // Making really big changes
-
     input:
     tuple val(meta), path(r1), path(r2)
 
@@ -17,7 +13,6 @@ process FASTQC_FASTQC {
     script:
     def args = task.ext.args ?: ''
     """
-    # Making breaking change
     fastqc \\
         ${args} \\
         --threads ${task.cpus} \\

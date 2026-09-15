@@ -3,6 +3,7 @@ FROM mambaorg/micromamba:1.5.8
 USER root
 
 RUN micromamba install -y -n base -c bioconda -c conda-forge \
+        procps-ng \
         fastqc=0.12.1 \
     && micromamba clean --all --yes
 

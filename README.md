@@ -1,21 +1,59 @@
 # nf-mod-fastqc
 
-This is GBI's FastQC Nextflow module.
+Nextflow module for FastQC (sequencing read quality control). Used as a git submodule by pipelines.
 
-Nextflow module for fastqc. Used as a git submodule by pipelines.
-
-Image: `ghcr.io/eit-gbi/nf-mod-fastqc:latest`
+Image: `ghcr.io/eit-gbi/nf-mod-fastqc`
 
 ## Processes
 
-- `FASTQC_FASTQC` — TODO: describe inputs/outputs
+Each subtool lives in its own folder (nf-core style), with a `main.nf`, a
+`meta.yml` and an nf-test case under `tests/`.
+
+| Process | Path | Inputs | Emits |
+| --- | --- | --- | --- |
+| `FASTQC_FASTQC` | `fastqc/main.nf` | `tuple val(meta), path(r1), path(r2)` | `html`, `zip`, `versions_fastqc` |
+
+## Publishing
+
+These processes do **not** publish their own outputs. Publishing is the
+consuming pipeline's job, via a workflow `output {}` block. This keeps the
+module reusable across pipelines that want different result layouts.
+
+## Tool arguments
+
+Flags are passed through `task.ext.args` (and `args2`/`args3` where a process
+runs more than one command) rather than read from pipeline `params`, so the
+module never depends on a particular pipeline's parameter names:
+
+```groovy
+process {
+    withName: FASTQC_FASTQC {
+        ext.args = '--some-flag'
+    }
+}
+```
 
 ## Use as submodule
+
+Pin to a release tag rather than a branch, so pipeline runs stay reproducible:
+
 ```bash
-git submodule add https://github.com/eit-gbi/nf-mod-fastqc.git modules/fastqc
+git submodule add https://github.com/EIT-GBI/nf-mod-fastqc.git modules/fastqc
+git -C modules/fastqc checkout v1.0.0
 ```
 
 Then in your pipeline:
+
+```groovy
+include { FASTQC_FASTQC } from './modules/fastqc/fastqc/main.nf'
 ```
-include { FASTQC_FASTQC } from './modules/fastqc/main.nf'
-```
+
+## Requirements
+
+Nextflow 26.04.4 or newer.
+
+## Releasing
+
+Merging a PR to `main` with exactly one `bump:patch`, `bump:minor` or
+`bump:major` label bumps `manifest.version` in `nextflow.config`, tags the
+release and publishes the container image.

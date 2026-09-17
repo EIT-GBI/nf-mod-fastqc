@@ -4,6 +4,9 @@ nextflow_process {
     script "../main.nf"
     process "FASTQC_FASTQC"
 
+    def TEST_R1 = 'file("https://raw.githubusercontent.com/nf-core/test-datasets/modules/data/genomics/sarscov2/illumina/fastq/test_1.fastq.gz", checkIfExists: true)'
+    def TEST_R2 = 'file("https://raw.githubusercontent.com/nf-core/test-datasets/modules/data/genomics/sarscov2/illumina/fastq/test_2.fastq.gz", checkIfExists: true)'
+
     test("FASTQC_FASTQC - stub - wiring and output names") {
 
         options "-stub-run"
@@ -11,7 +14,7 @@ nextflow_process {
         when {
             process {
                 """
-                input[0] = [[id:'test'], file("https://raw.githubusercontent.com/nf-core/test-datasets/modules/data/genomics/sarscov2/illumina/fastq/test_1.fastq.gz", checkIfExists: true), file("https://raw.githubusercontent.com/nf-core/test-datasets/modules/data/genomics/sarscov2/illumina/fastq/test_2.fastq.gz", checkIfExists: true)]
+                input[0] = [[id:'test'], ${TEST_R1}, ${TEST_R2}]
                 """
             }
         }
@@ -20,6 +23,57 @@ nextflow_process {
             assert process.success
             assert process.out.html
             assert process.out.zip
+        }
+    }
+
+    test("FASTQC_FASTQC - reports on both reads of the pair") {
+
+        config "../../tests.config"
+
+        when {
+            process {
+                """
+                input[0] = [[id:'test'], ${TEST_R1}, ${TEST_R2}]
+                """
+            }
+        }
+
+        then {
+            assert process.success
+
+            def zips  = process.out.zip[0][1].collect { it.toString() }.sort()
+            def htmls = process.out.html[0][1].collect { file(it).name }.sort()
+
+            assert htmls == ['test_1_fastqc.html', 'test_2_fastqc.html']
+            assert zips.size() == 2
+
+            // Neither the zip nor the HTML can be snapshotted directly: the zip
+            // stores an mtime per entry, so its checksum moves between two
+            // identical runs. What is inside is stable, so read that instead.
+            def read_entry = { String zip_path, String suffix ->
+                def zf = new java.util.zip.ZipFile(new File(zip_path))
+                try {
+                    def entry = zf.entries().toList().find { it.name.endsWith(suffix) }
+                    assert entry, "no ${suffix} in ${zip_path}"
+                    return zf.getInputStream(entry).text.readLines()
+                }
+                finally {
+                    zf.close()
+                }
+            }
+
+            def summary = read_entry(zips[0], '/summary.txt')
+            // drop the leading '##FastQC <version>' line, which moves whenever
+            // the image is rebuilt
+            def basic_stats = read_entry(zips[0], '/fastqc_data.txt')
+                .takeWhile { it != '>>END_MODULE' }
+                .findAll { !it.startsWith('##FastQC') }
+
+            assert summary.every { it.split('\t')[0] in ['PASS', 'WARN', 'FAIL'] }
+            assert summary.find { it.contains('Basic Statistics') }.startsWith('PASS')
+            assert basic_stats.find { it.startsWith('Total Sequences') } == 'Total Sequences\t100'
+
+            assert snapshot(summary, basic_stats).match()
         }
     }
 }

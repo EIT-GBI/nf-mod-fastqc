@@ -64,6 +64,19 @@ include { FASTQC_FASTQC } from './modules/fastqc/fastqc/main.nf'
 
 Nextflow 26.04.4 or newer.
 
+## Tests
+
+`nf-test test`. There is a stub test covering wiring and output names, and a
+test that runs FastQC for real against `ghcr.io/eit-gbi/nf-mod-fastqc:latest`
+and snapshots the report. The real test needs Docker.
+
+Neither output can be snapshotted directly. The zip stores an mtime per entry,
+so its checksum differs between two identical runs, and the HTML embeds the run
+date. What is *inside* the zip is stable, so the test opens it and snapshots
+`summary.txt` and the Basic Statistics block of `fastqc_data.txt` instead. The
+leading `##FastQC <version>` line is dropped, since it moves whenever the image
+is rebuilt.
+
 ## Releasing
 
 Merging a PR to `main` with exactly one `bump:patch`, `bump:minor` or

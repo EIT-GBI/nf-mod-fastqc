@@ -2,7 +2,7 @@
 
 Nextflow module for FastQC (sequencing read quality control). Used as a git submodule by pipelines.
 
-Image: `ghcr.io/eit-gbi/nf-mod-fastqc:v2.0.2`
+Image: `ghcr.io/eit-gbi/nf-mod-fastqc:v3.0.0`
 
 ## Processes
 
@@ -39,7 +39,7 @@ Pin to a release tag rather than a branch, so pipeline runs stay reproducible:
 
 ```bash
 git submodule add https://github.com/EIT-GBI/nf-mod-fastqc.git modules/fastqc
-git -C modules/fastqc checkout v2.0.2
+git -C modules/fastqc checkout v3.0.0
 ```
 
 Then include the module's container config from your `nextflow.config`. Nextflow

@@ -1,0 +1,38 @@
+name: fastqc_fastqc
+description: |
+  Quality-control reports for paired FASTQ files.
+keywords:
+  - qc
+  - fastq
+  - fastqc
+tools:
+  - fastqc:
+      description: |
+        fastqc
+
+input:
+  - reads:
+      type: map/file
+      description: |
+        Sample metadata map and the paired FASTQ files.
+      pattern: "tuple val(meta), path(r1), path(r2)"
+
+output:
+  - html:
+      type: map/file
+      description: |
+        FastQC HTML reports.
+      pattern: "tuple val(meta), path(*.html)"
+  - zip:
+      type: map/file
+      description: |
+        FastQC report archives.
+      pattern: "tuple val(meta), path(*.zip)"
+  - versions_fastqc:
+      type: map/file
+      description: |
+        FastQC version, published to the `versions` topic.
+      pattern: "topic: versions"
+
+authors:
+  - "EIT Generative Biology Institute"

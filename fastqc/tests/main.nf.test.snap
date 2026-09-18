@@ -1,0 +1,36 @@
+{
+    "FASTQC_FASTQC - reports on both reads of the pair": {
+        "content": [
+            [
+                "PASS\tBasic Statistics\ttest_1.fastq.gz",
+                "PASS\tPer base sequence quality\ttest_1.fastq.gz",
+                "FAIL\tPer tile sequence quality\ttest_1.fastq.gz",
+                "PASS\tPer sequence quality scores\ttest_1.fastq.gz",
+                "FAIL\tPer base sequence content\ttest_1.fastq.gz",
+                "FAIL\tPer sequence GC content\ttest_1.fastq.gz",
+                "PASS\tPer base N content\ttest_1.fastq.gz",
+                "WARN\tSequence Length Distribution\ttest_1.fastq.gz",
+                "PASS\tSequence Duplication Levels\ttest_1.fastq.gz",
+                "FAIL\tOverrepresented sequences\ttest_1.fastq.gz",
+                "PASS\tAdapter Content\ttest_1.fastq.gz"
+            ],
+            [
+                ">>Basic Statistics\tpass",
+                "#Measure\tValue",
+                "Filename\ttest_1.fastq.gz",
+                "File type\tConventional base calls",
+                "Encoding\tSanger / Illumina 1.9",
+                "Total Sequences\t100",
+                "Total Bases\t13.8 kbp",
+                "Sequences flagged as poor quality\t0",
+                "Sequence length\t72-151",
+                "%GC\t39"
+            ]
+        ],
+        "meta": {
+            "nf-test": "0.9.3",
+            "nextflow": "26.04.6"
+        },
+        "timestamp": "2026-09-17T13:40:22.429921"
+    }
+}
